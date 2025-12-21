@@ -32,8 +32,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+        }
     }
     viewBinding {
         enable = true
@@ -76,4 +78,6 @@ dependencies {
 
     implementation(libs.library)
     implementation(libs.media3.ui)
+
+    implementation("io.github.kyant0:taglib:1.0.5")
 }
