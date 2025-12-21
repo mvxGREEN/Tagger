@@ -702,26 +702,15 @@ class MusicAdapter(private val activity: MainActivity, private var musicList: Li
                 .into(binding.imageAlbumArt)
             // --- FINAL FIX END ---
 
-            // 3. Click Listeners
             binding.root.setOnClickListener {
                 if (!isEditing) {
-                    // Normal playback behavior
-                    activity.startMusicPlayback(file, adapterPosition)
-                }
-                // If editing, clicking the root view does nothing, as the user must save or exit.
-            }
+                    // Option A: Open Player (Your existing code)
+                    // activity.startMusicPlayback(file, adapterPosition)
 
-            /* TODO Long click listener to enter edit mode
-            binding.root.setOnLongClickListener {
-                if (editingPosition != RecyclerView.NO_POSITION) {
-                    // Already editing something, exit current edit before starting a new one
-                    editListener.saveEditAndExit(musicList[editingPosition], "", "") // Pass empty strings, indicating an unsaved exit
+                    // Option B: Open Tag Editor
+                    activity.openTagEditor(file)
                 }
-                editListener.startEditing(adapterPosition)
-                true // Consume the long click event
             }
-
-             */
 
             // NEW: Save button click listener
             binding.buttonSaveEdit.setOnClickListener {
@@ -1091,7 +1080,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope, SearchView.OnQueryText
         //startActivity(activityIntent)
     }
 
-    // --- MusicEditListener Implementation ---
+    // Inside MainActivity class
+    fun openTagEditor(file: AudioFile) {
+        val intent = Intent(this, MusicTagEditorActivity::class.java).apply {
+            putExtra("audio_file", file)
+        }
+        startActivity(intent)
+    }
 
     override fun startEditing(position: Int) {
         val viewHolder = binding.recyclerViewMusic.findViewHolderForAdapterPosition(position)
