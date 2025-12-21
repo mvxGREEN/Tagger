@@ -1,0 +1,62 @@
+[versions]
+activityKtx = "1.11.0"
+agp = "8.13.2"
+appcompatVersion = "1.7.1"
+constraintlayout = "2.2.1"
+coreKtxVersion = "1.17.0"
+exifinterface = "1.4.1"
+glide = "4.16.0"
+kotlin = "2.0.21"
+coreKtx = "1.17.0"
+junit = "4.13.2"
+junitVersion = "1.1.5"
+espressoCore = "3.7.0"
+appcompat = "1.7.1"
+kotlinxCoroutinesCore = "1.8.1"
+library = "1.3.0"
+material = "1.13.0"
+materialVersion = "1.13.0"
+media = "1.7.1"
+media3Exoplayer = "1.8.0"
+media3Ui = "1.8.0"
+recyclerview = "1.4.0"
+media3version = "1.8.0"
+swiperefreshlayout = "1.2.0-rc01"
+swiperefreshlayoutVersion = "1.1.0"
+
+[libraries]
+androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
+androidx-appcompat-v161 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-ktx-v1120 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
+androidx-exifinterface = { module = "androidx.exifinterface:exifinterface", version.ref = "exifinterface" }
+androidx-media3-common = { module = "androidx.media3:media3-common", version.ref = "media3Exoplayer" }
+androidx-media3-common-ktx = { module = "androidx.media3:media3-common-ktx", version.ref = "media3Exoplayer" }
+androidx-media3-container = { module = "androidx.media3:media3-container", version.ref = "media3Exoplayer" }
+androidx-media3-database = { module = "androidx.media3:media3-database", version.ref = "media3Exoplayer" }
+androidx-media3-datasource = { module = "androidx.media3:media3-datasource", version.ref = "media3Exoplayer" }
+androidx-media3-decoder = { module = "androidx.media3:media3-decoder", version.ref = "media3Exoplayer" }
+androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3Exoplayer" }
+androidx-media3-session = { module = "androidx.media3:media3-session", version.ref = "media3Exoplayer" }
+androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
+compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesCore" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+library = { module = "me.zhanghai.android.fastscroll:library", version.ref = "library" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+material-v1110 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
+media = { module = "androidx.media:media", version.ref = "media" }
+media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3Ui" }
+swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayoutVersion" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+

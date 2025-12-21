@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    // General
+    <dimen name="spacing_xsmall">2dp</dimen>
+    <dimen name="spacing_small">4dp</dimen>
+    <dimen name="spacing_med">8dp</dimen>
+    <dimen name="spacing_large">16dp</dimen>
+    <dimen name="spacing_xlarge">24dp</dimen>
+    <dimen name="spacing_xxlarge">40dp</dimen>
+    <dimen name="spacing_xxxlarge">64dp</dimen>
+    <dimen name="spacing_xxxxlarge">72dp</dimen>
+
+    // Elevation
+    <dimen name="elevation_top">24dp</dimen>
+    <dimen name="elevation_higher">20dp</dimen>
+    <dimen name="elevation_high">16dp</dimen>
+    <dimen name="elevation_mid_high">14dp</dimen>
+    <dimen name="elevation_middle">12dp</dimen>
+    <dimen name="elevation_mid_low">10dp</dimen>
+    <dimen name="elevation_low">8dp</dimen>
+    <dimen name="elevation_bottom">0dp</dimen>
+
+    // View Size (Square)
+    <dimen name="size_btn_primary">48dp</dimen>
+    <dimen name="size_imagebutton_peripheral">24dp</dimen>
+    <dimen name="size_logo_about">96dp</dimen>
+
+    // Height
+    <dimen name="size_preview_card">372dp</dimen>
+    <dimen name="height_search_bar">48dp</dimen>
+    <dimen name="height_fragment_big">480dp</dimen>
+    <dimen name="height_fragment_file">80dp</dimen>
+    <dimen name="height_toolbar">56dp</dimen>
+
+    // Width
+    <dimen name="width_fragment_large">320dp</dimen>
+    <dimen name="minwidth_panel_edittext">76dp</dimen>
+    <dimen name="maxwidth_panel_edittext">152dp</dimen>
+
+    // Corners
+    <dimen name="corner_radius_primary">8dp</dimen>
+    <dimen name="corner_radius_secondary">4dp</dimen>
+
+    // Text Size
+    <dimen name="text_size_frag_body">16sp</dimen>
+    <dimen name="text_size_frag_body_small">14sp</dimen>
+    <dimen name="text_size_edittext">24sp</dimen>
+
+    // Other
+    <dimen name="none">0dp</dimen>
+    <dimen name="width_panel_pb">140dp</dimen>
+    <dimen name="height_panel_pb">48dp</dimen>
+    <dimen name="width_panel_edittext">156dp</dimen>
+
+</resources>
