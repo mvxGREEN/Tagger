@@ -749,11 +749,10 @@ class MusicAdapter(private val activity: MainActivity, private var musicList: Li
     override fun getItemCount(): Int = musicList.size
 
     fun updateList(newList: List<AudioFile>) {
+        // Clear the internal map cache for the edited file
         newList.forEach { newFile ->
             val oldFile = musicList.find { it.id == newFile.id }
             if (oldFile != null && oldFile.dateModified != newFile.dateModified) {
-                // This is the file that was just edited!
-                // Remove it so it's forced to reload from the MediaMetadataRetriever
                 imageCache.remove(newFile.id)
             }
         }
@@ -770,7 +769,6 @@ class MusicAdapter(private val activity: MainActivity, private var musicList: Li
             override fun areContentsTheSame(oldPos: Int, newPos: Int): Boolean {
                 val oldItem = musicList[oldPos]
                 val newItem = newList[newPos]
-                // If dateModified changes, this returns false, and the row is re-drawn
                 return oldItem.title == newItem.title &&
                         oldItem.artist == newItem.artist &&
                         oldItem.dateModified == newItem.dateModified

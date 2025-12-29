@@ -52,6 +52,10 @@ class MusicTagEditorActivity : AppCompatActivity() {
             binding.etArtist.setText(file.artist)
             binding.etAlbum.setText(file.album)
             binding.etGenre.setText(file.genre)
+            binding.etAlbumArtist.setText(file.albumArtist)
+            binding.etComposer.setText(file.composer)
+            binding.etYear.setText(file.year?.toString() ?: "")
+            binding.etTrackNumber.setText(file.track?.toString() ?: "")
 
             Log.d("MusicTagEditorActivity", "albumId: ${file.albumId}")
 
@@ -69,7 +73,7 @@ class MusicTagEditorActivity : AppCompatActivity() {
                     Glide.with(this@MusicTagEditorActivity)
                         .load(imageBytes)
                         .signature(com.bumptech.glide.signature.ObjectKey(cacheKey))
-                        .placeholder(R.drawable.default_album_art_144px)
+                        .placeholder(R.drawable.default_album_art_192px)
                         .into(binding.editAlbumArt)
                 }
             } else {
@@ -77,7 +81,7 @@ class MusicTagEditorActivity : AppCompatActivity() {
                 Glide.with(this@MusicTagEditorActivity)
                     .load(file.albumId?.let { getAlbumArtUri(it) })
                     .signature(com.bumptech.glide.signature.ObjectKey(cacheKey))
-                    .placeholder(R.drawable.default_album_art_144px)
+                    .placeholder(R.drawable.default_album_art_192px)
                     .into(binding.editAlbumArt)
             }
 
@@ -116,26 +120,32 @@ class MusicTagEditorActivity : AppCompatActivity() {
                     val jaudioFile = org.jaudiotagger.audio.AudioFileIO.read(tempFile)
                     val tag = jaudioFile.tagOrCreateAndSetDefault
 
-                    // 1. Save Text Fields
-                    tag.setField(org.jaudiotagger.tag.FieldKey.TITLE, binding.etTitle.text.toString())
-                    tag.setField(org.jaudiotagger.tag.FieldKey.ARTIST, binding.etArtist.text.toString())
-                    tag.setField(org.jaudiotagger.tag.FieldKey.ALBUM, binding.etAlbum.text.toString())
-                    tag.setField(org.jaudiotagger.tag.FieldKey.GENRE, binding.etGenre.text.toString())
+                    // Helper to set field only if text is not blank
+                    fun setTagField(key: org.jaudiotagger.tag.FieldKey, value: String) {
+                        if (value.isNotBlank()) {
+                            tag.setField(key, value)
+                        } else {
+                            tag.deleteField(key)
+                        }
+                    }
+
+                    // Set all tags including the new requested fields
+                    setTagField(org.jaudiotagger.tag.FieldKey.TITLE, binding.etTitle.text.toString())
+                    setTagField(org.jaudiotagger.tag.FieldKey.ARTIST, binding.etArtist.text.toString())
+                    setTagField(org.jaudiotagger.tag.FieldKey.ALBUM, binding.etAlbum.text.toString())
+                    setTagField(org.jaudiotagger.tag.FieldKey.ALBUM_ARTIST, binding.etAlbumArtist.text.toString())
+                    setTagField(org.jaudiotagger.tag.FieldKey.TRACK, binding.etTrackNumber.text.toString())
+                    setTagField(org.jaudiotagger.tag.FieldKey.GENRE, binding.etGenre.text.toString())
+                    setTagField(org.jaudiotagger.tag.FieldKey.COMPOSER, binding.etComposer.text.toString())
+                    setTagField(org.jaudiotagger.tag.FieldKey.YEAR, binding.etYear.text.toString())
 
                     // Handle Artwork with a size check to prevent OOM
                     selectedImageUri?.let { imageUri ->
-                        // Call the compression function here instead of inputStream.readBytes()
-                        val imageBytes = getCompressedBytes(imageUri)
-
-                        if (imageBytes != null) {
+                        getCompressedBytes(imageUri)?.let { imageBytes ->
                             val artwork = org.jaudiotagger.tag.images.ArtworkFactory.getNew()
                             artwork.binaryData = imageBytes
-
-                            // Clear existing and set new compressed artwork
                             tag.deleteArtworkField()
                             tag.setField(artwork)
-                        } else {
-                            throw Exception("Failed to process selected image.")
                         }
                     }
 
@@ -198,31 +208,35 @@ class MusicTagEditorActivity : AppCompatActivity() {
     }
 
     private suspend fun updateMediaStoreRecord(file: AudioFile) {
-        // Generate a fresh timestamp in seconds
         val newTimestamp = System.currentTimeMillis() / 1000
 
         val values = ContentValues().apply {
             put(MediaStore.Audio.Media.TITLE, binding.etTitle.text.toString())
             put(MediaStore.Audio.Media.ARTIST, binding.etArtist.text.toString())
             put(MediaStore.Audio.Media.ALBUM, binding.etAlbum.text.toString())
+            put(MediaStore.Audio.Media.ALBUM_ARTIST, binding.etAlbumArtist.text.toString())
+            put(MediaStore.Audio.Media.COMPOSER, binding.etComposer.text.toString())
+            put(MediaStore.Audio.Media.YEAR, binding.etYear.text.toString().toIntOrNull())
+            put(MediaStore.Audio.Media.TRACK, binding.etTrackNumber.text.toString().toIntOrNull())
             put(MediaStore.Audio.Media.GENRE, binding.etGenre.text.toString())
-            // Update the system record's modification date
             put(MediaStore.Audio.Media.DATE_MODIFIED, newTimestamp)
         }
 
         contentResolver.update(file.uri, values, null, null)
 
         withContext(Dispatchers.Main) {
-            // IMPORTANT: Create a copy with the NEW metadata AND the NEW timestamp
             val updated = file.copy(
                 title = binding.etTitle.text.toString(),
                 artist = binding.etArtist.text.toString(),
                 album = binding.etAlbum.text.toString(),
+                albumArtist = binding.etAlbumArtist.text.toString(),
+                composer = binding.etComposer.text.toString(),
+                year = binding.etYear.text.toString().toIntOrNull(),
+                track = binding.etTrackNumber.text.toString().toIntOrNull(),
                 genre = binding.etGenre.text.toString(),
-                dateModified = newTimestamp // This triggers the UI refresh
+                dateModified = newTimestamp
             )
 
-            // Push the update to the repository
             PlaylistRepository.updateFile(updated)
             Toast.makeText(this@MusicTagEditorActivity, "Saved Successfully!", Toast.LENGTH_SHORT).show()
             finish()

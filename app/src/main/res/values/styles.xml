@@ -19,8 +19,14 @@
         <item name="android:windowBackground">@drawable/musi_v2</item>
     </style>
 
+    <!-- Image -->
+    <style name="RoundedCornersImage">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
 
-    // Text Appearance
+
+    <!-- Text Appearance -->
     <style name="TextAppMain" parent="TextAppearance.AppCompat">
         <item name="android:textSize">26sp</item>
         <item name="android:textColor">@color/white</item>
