@@ -197,13 +197,32 @@ class MusicTagEditorActivity : AppCompatActivity() {
 
     private fun getCompressedBytes(uri: Uri): ByteArray? {
         val inputStream = contentResolver.openInputStream(uri) ?: return null
-        val originalBitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+        val originalBitmap = android.graphics.BitmapFactory.decodeStream(inputStream) ?: return null
 
-        // Scale down if the image is excessively large
-        val scaledBitmap = android.graphics.Bitmap.createScaledBitmap(originalBitmap, 1000, 1000, true)
+        // Determine the dimensions for a center crop (making it a square)
+        val width = originalBitmap.width
+        val height = originalBitmap.height
+        val newDimension = if (width < height) width else height
+
+        val xOffset = (width - newDimension) / 2
+        val yOffset = (height - newDimension) / 2
+
+        // Create the cropped square bitmap without scaling the resolution down
+        val croppedBitmap = android.graphics.Bitmap.createBitmap(
+            originalBitmap,
+            xOffset,
+            yOffset,
+            newDimension,
+            newDimension
+        )
 
         val outputStream = java.io.ByteArrayOutputStream()
-        scaledBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, outputStream)
+        // Compress quality to 90 to reduce file size while maintaining high visual fidelity
+        croppedBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, outputStream)
+
+        // Cleanup memory
+        if (originalBitmap != croppedBitmap) originalBitmap.recycle()
+
         return outputStream.toByteArray()
     }
 

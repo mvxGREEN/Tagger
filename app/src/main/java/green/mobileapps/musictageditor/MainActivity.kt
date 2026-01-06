@@ -2,6 +2,7 @@ package green.mobileapps.musictageditor
 
 import android.Manifest
 import android.app.Application
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -17,6 +18,7 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -851,27 +853,15 @@ class MainActivity : AppCompatActivity(), CoroutineScope, SearchView.OnQueryText
         binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Initialize ViewModel
-        viewModel = ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-        )
+        viewModel = ViewModelProvider(this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application))
             .get(MusicViewModel::class.java)
 
-        // NEW: Initialize the sort buttons from the toolbar's ConstraintLayout
-        val toolbarLayout = binding.toolbarSearch.getChildAt(0) as? ViewGroup
-        sortButton = toolbarLayout?.findViewById(R.id.button_sort) ?: throw kotlin.IllegalStateException(
-            "Sort button not found in toolbar layout"
-        )
-        // NEW: Initialize the direction button
-        sortDirectionButton = toolbarLayout.findViewById(R.id.button_sort_direction) ?: throw kotlin.IllegalStateException(
-            "Sort direction button not found in toolbar layout"
-        )
-        // NEW: Initialize the back button
-        backButton = toolbarLayout.findViewById(R.id.button_back_edit) ?: throw kotlin.IllegalStateException(
-            "Back button not found in toolbar layout"
-        )
+        setSupportActionBar(binding.toolbarSearch)
 
+        sortButton = binding.buttonSort
+        sortDirectionButton = binding.buttonSortDirection
+        backButton = binding.buttonBackEdit
 
         setupRecyclerView()
         setupSearchView()
@@ -1328,7 +1318,48 @@ class MainActivity : AppCompatActivity(), CoroutineScope, SearchView.OnQueryText
         job.cancel()
     }
 
-    fun onRateClick(item: MenuItem) {}
-    fun onHelpClick(item: MenuItem) {}
-    fun showBigFrag(item: MenuItem) {}
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection.
+        when (item.getItemId()) {
+            else -> return super.onOptionsItemSelected(item)
+        }
+    }
+
+    // open about page
+    fun onAboutClick(menuItem: MenuItem?) {
+        val aboutUrl = "https://mobileapps.green/"
+        val aboutIntent = Intent(Intent.ACTION_VIEW, Uri.parse(aboutUrl))
+        this@MainActivity.startActivity(aboutIntent)
+    }
+
+    // open privacy policy page
+    fun onPrivacyClick(menuItem: MenuItem?) {
+        val privacyUrl = "https://mobileapps.green/privacy-policy"
+        val privacyIntent = Intent(Intent.ACTION_VIEW, Uri.parse(privacyUrl))
+        this@MainActivity.startActivity(privacyIntent)
+    }
+
+    fun onRateClick(menuItem: MenuItem?) {
+        val appPackageName = getPackageName() // getPackageName() from Context or Activity object
+        try {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("market://details?id=" + appPackageName)
+                )
+            )
+        } catch (anfe: ActivityNotFoundException) {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)
+                )
+            )
+        }
+    }
     }
