@@ -20,10 +20,9 @@ class MusicTagEditorActivity : AppCompatActivity() {
     private lateinit var binding: TagEditorActivityBinding
     private var audioFile: AudioFile? = null
 
-    // Permission launcher for Android 11+ (Scoped Storage)
     private val intentSenderLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
-            saveMetadata() // Retry saving after permission granted
+            saveMetadata()
         }
     }
 
@@ -51,7 +50,7 @@ class MusicTagEditorActivity : AppCompatActivity() {
             binding.etTitle.setText(file.title)
             binding.etArtist.setText(file.artist)
             binding.etAlbum.setText(file.album)
-            binding.etGenre.setText(file.genre)
+            // REMOVED: binding.etGenre.setText(file.genre)
             binding.etAlbumArtist.setText(file.albumArtist)
             binding.etComposer.setText(file.composer)
             binding.etYear.setText(file.year?.toString() ?: "")
@@ -59,7 +58,6 @@ class MusicTagEditorActivity : AppCompatActivity() {
 
             Log.d("MusicTagEditorActivity", "albumId: ${file.albumId}")
 
-            // Replicated logic from MainActivity/MusicAdapter
             val cacheKey = "${file.id}_${file.dateModified}"
             val isProblematic = file.album?.lowercase() == "music" ||
                     file.album?.lowercase() == "documents" ||
@@ -67,7 +65,6 @@ class MusicTagEditorActivity : AppCompatActivity() {
                     file.artist.lowercase() == "<unknown>"
 
             if (isProblematic) {
-                // Path A: Manual extraction for problematic files
                 this.lifecycleScope.launch {
                     val imageBytes = getEmbeddedPicture(file.uri)
                     Glide.with(this@MusicTagEditorActivity)
@@ -77,7 +74,6 @@ class MusicTagEditorActivity : AppCompatActivity() {
                         .into(binding.editAlbumArt)
                 }
             } else {
-                // Path B: Standard MediaStore loading for clean metadata
                 Glide.with(this@MusicTagEditorActivity)
                     .load(file.albumId?.let { getAlbumArtUri(it) })
                     .signature(com.bumptech.glide.signature.ObjectKey(cacheKey))
@@ -108,19 +104,14 @@ class MusicTagEditorActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 contentResolver.openFileDescriptor(file.uri, "rw")?.use { pfd ->
-                    // 1. Create a workspace in cache
                     val tempFile = java.io.File(cacheDir, "edit_${System.currentTimeMillis()}.mp3")
-
-                    // 2. Copy original to temp FIRST
                     contentResolver.openInputStream(file.uri)?.use { input ->
                         tempFile.outputStream().use { output -> input.copyTo(output) }
                     } ?: throw Exception("Could not read original file")
 
-                    // 3. Edit the temp file
                     val jaudioFile = org.jaudiotagger.audio.AudioFileIO.read(tempFile)
                     val tag = jaudioFile.tagOrCreateAndSetDefault
 
-                    // Helper to set field only if text is not blank
                     fun setTagField(key: org.jaudiotagger.tag.FieldKey, value: String) {
                         if (value.isNotBlank()) {
                             tag.setField(key, value)
@@ -129,17 +120,15 @@ class MusicTagEditorActivity : AppCompatActivity() {
                         }
                     }
 
-                    // Set all tags including the new requested fields
                     setTagField(org.jaudiotagger.tag.FieldKey.TITLE, binding.etTitle.text.toString())
                     setTagField(org.jaudiotagger.tag.FieldKey.ARTIST, binding.etArtist.text.toString())
                     setTagField(org.jaudiotagger.tag.FieldKey.ALBUM, binding.etAlbum.text.toString())
                     setTagField(org.jaudiotagger.tag.FieldKey.ALBUM_ARTIST, binding.etAlbumArtist.text.toString())
                     setTagField(org.jaudiotagger.tag.FieldKey.TRACK, binding.etTrackNumber.text.toString())
-                    setTagField(org.jaudiotagger.tag.FieldKey.GENRE, binding.etGenre.text.toString())
+                    // REMOVED: Genre tag field
                     setTagField(org.jaudiotagger.tag.FieldKey.COMPOSER, binding.etComposer.text.toString())
                     setTagField(org.jaudiotagger.tag.FieldKey.YEAR, binding.etYear.text.toString())
 
-                    // Handle Artwork with a size check to prevent OOM
                     selectedImageUri?.let { imageUri ->
                         getCompressedBytes(imageUri)?.let { imageBytes ->
                             val artwork = org.jaudiotagger.tag.images.ArtworkFactory.getNew()
@@ -149,10 +138,8 @@ class MusicTagEditorActivity : AppCompatActivity() {
                         }
                     }
 
-                    // commit to temp file
                     jaudioFile.commit()
 
-                    // 3. Write temp file back
                     contentResolver.openOutputStream(file.uri, "rwt")?.use { output ->
                         tempFile.inputStream().use { input ->
                             input.copyTo(output)
@@ -183,12 +170,9 @@ class MusicTagEditorActivity : AppCompatActivity() {
         }
     }
 
-    // Inside MusicTagEditorActivity class
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            // Load the preview in the UI immediately
             Glide.with(this).load(it).into(binding.editAlbumArt)
-            // Store the selected URI to be used during saveMetadata()
             selectedImageUri = it
         }
     }
@@ -199,15 +183,12 @@ class MusicTagEditorActivity : AppCompatActivity() {
         val inputStream = contentResolver.openInputStream(uri) ?: return null
         val originalBitmap = android.graphics.BitmapFactory.decodeStream(inputStream) ?: return null
 
-        // Determine the dimensions for a center crop (making it a square)
         val width = originalBitmap.width
         val height = originalBitmap.height
         val newDimension = if (width < height) width else height
-
         val xOffset = (width - newDimension) / 2
         val yOffset = (height - newDimension) / 2
 
-        // Create the cropped square bitmap without scaling the resolution down
         val croppedBitmap = android.graphics.Bitmap.createBitmap(
             originalBitmap,
             xOffset,
@@ -217,10 +198,8 @@ class MusicTagEditorActivity : AppCompatActivity() {
         )
 
         val outputStream = java.io.ByteArrayOutputStream()
-        // Compress quality to 90 to reduce file size while maintaining high visual fidelity
         croppedBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, outputStream)
 
-        // Cleanup memory
         if (originalBitmap != croppedBitmap) originalBitmap.recycle()
 
         return outputStream.toByteArray()
@@ -237,7 +216,7 @@ class MusicTagEditorActivity : AppCompatActivity() {
             put(MediaStore.Audio.Media.COMPOSER, binding.etComposer.text.toString())
             put(MediaStore.Audio.Media.YEAR, binding.etYear.text.toString().toIntOrNull())
             put(MediaStore.Audio.Media.TRACK, binding.etTrackNumber.text.toString().toIntOrNull())
-            put(MediaStore.Audio.Media.GENRE, binding.etGenre.text.toString())
+            // REMOVED: Genre update
             put(MediaStore.Audio.Media.DATE_MODIFIED, newTimestamp)
         }
 
@@ -252,7 +231,7 @@ class MusicTagEditorActivity : AppCompatActivity() {
                 composer = binding.etComposer.text.toString(),
                 year = binding.etYear.text.toString().toIntOrNull(),
                 track = binding.etTrackNumber.text.toString().toIntOrNull(),
-                genre = binding.etGenre.text.toString(),
+                // Removed Genre from copy
                 dateModified = newTimestamp
             )
 
