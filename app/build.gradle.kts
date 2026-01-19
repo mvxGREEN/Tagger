@@ -72,7 +72,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // media3 support
-    implementation("androidx.media:media:1.7.1")
+    implementation(libs.media)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.common)
     implementation(libs.androidx.media3.common.ktx)
@@ -81,9 +81,9 @@ dependencies {
     implementation(libs.library)
     implementation(libs.media3.ui)
 
-    implementation("com.github.AdrienPoupa:jaudiotagger:2.2.3")
+    implementation(libs.jaudiotagger)
 
-    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-crashlytics")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 }

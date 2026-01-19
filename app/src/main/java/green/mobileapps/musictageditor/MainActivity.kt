@@ -128,7 +128,7 @@ data class AudioFile(
     // Media Store Metadata
     val album: String?,
     val albumArtist: String?,
-    val author: String?,
+    //val author: String?,
     val composer: String?,
     val track: Int?,
     val year: Int?,
@@ -141,7 +141,7 @@ data class AudioFile(
 
     // Playback Metadata
     val bookmark: Long?,
-    val bitrate: Int?,
+    //val bitrate: Int?,
     // REMOVED: val sampleRate: Int?,
     // REMOVED: val bitsPerSample: Int?,
 
@@ -155,11 +155,11 @@ data class AudioFile(
     // REMOVED: val isRecording: Boolean,
 
     // Status Flags (Boolean)
-    val isDownload: Boolean,
-    val isDrm: Boolean,
-    val isFavorite: Boolean,
-    val isPending: Boolean,
-    val isTrashed: Boolean
+    //val isDownload: Boolean,
+    //val isDrm: Boolean,
+    //val isFavorite: Boolean,
+    //val isPending: Boolean,
+    //val isTrashed: Boolean
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -171,7 +171,7 @@ data class AudioFile(
         parcel.readValue(Long::class.java.classLoader) as? Long,
         parcel.readString(),
         parcel.readString(),
-        parcel.readString(),
+        //parcel.readString(),
         parcel.readString(),
         parcel.readValue(Int::class.java.classLoader) as? Int,
         parcel.readValue(Int::class.java.classLoader) as? Int,
@@ -180,19 +180,14 @@ data class AudioFile(
         parcel.readValue(Long::class.java.classLoader) as? Long,
         parcel.readValue(Long::class.java.classLoader) as? Long,
         parcel.readValue(Long::class.java.classLoader) as? Long,
-        parcel.readValue(Int::class.java.classLoader) as? Int,
+        //parcel.readValue(Int::class.java.classLoader) as? Int,
         // Removed SampleRate, BitsPerSample
         parcel.readByte() != 0.toByte(), // isMusic
         parcel.readByte() != 0.toByte(), // isPodcast
         parcel.readByte() != 0.toByte(), // isAlarm
         parcel.readByte() != 0.toByte(), // isNotification
         parcel.readByte() != 0.toByte(), // isRingtone
-        // Removed isAudiobook, isRecording
-        parcel.readByte() != 0.toByte(), // isDownload
-        parcel.readByte() != 0.toByte(), // isDrm
-        parcel.readByte() != 0.toByte(), // isFavorite
-        parcel.readByte() != 0.toByte(), // isPending
-        parcel.readByte() != 0.toByte()  // isTrashed
+
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -204,28 +199,21 @@ data class AudioFile(
         parcel.writeValue(albumId)
         parcel.writeString(album)
         parcel.writeString(albumArtist)
-        parcel.writeString(author)
         parcel.writeString(composer)
         parcel.writeValue(track)
         parcel.writeValue(year)
-        // Removed Genre
+        // Removed Genre, Author
         parcel.writeValue(size)
         parcel.writeValue(dateAdded)
         parcel.writeValue(dateModified)
         parcel.writeValue(bookmark)
-        parcel.writeValue(bitrate)
-        // Removed SampleRate, BitsPerSample
+        // Removed SampleRate, BitsPerSample, Bitrate
         parcel.writeByte(if (isMusic) 1 else 0)
         parcel.writeByte(if (isPodcast) 1 else 0)
         parcel.writeByte(if (isAlarm) 1 else 0)
         parcel.writeByte(if (isNotification) 1 else 0)
         parcel.writeByte(if (isRingtone) 1 else 0)
-        // Removed isAudiobook, isRecording
-        parcel.writeByte(if (isDownload) 1 else 0)
-        parcel.writeByte(if (isDrm) 1 else 0)
-        parcel.writeByte(if (isFavorite) 1 else 0)
-        parcel.writeByte(if (isPending) 1 else 0)
-        parcel.writeByte(if (isTrashed) 1 else 0)
+        // Removed isAudiobook, isRecording ...
     }
 
     override fun describeContents(): Int {
@@ -337,7 +325,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             MediaStore.Audio.Media.ALBUM_ID,
             MediaStore.Audio.Media.BOOKMARK,
             MediaStore.Audio.Media.SIZE,
-            MediaStore.Audio.Media.BITRATE,
+            //MediaStore.Audio.Media.BITRATE,
             // REMOVED: SAMPLERATE, BITS_PER_SAMPLE
             // REMOVED: IS_AUDIOBOOK, IS_RECORDING
             MediaStore.Audio.Media.IS_MUSIC,
@@ -347,18 +335,13 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             MediaStore.Audio.Media.IS_RINGTONE,
             MediaStore.Audio.Media.ALBUM,
             MediaStore.Audio.Media.ALBUM_ARTIST,
-            MediaStore.Audio.Media.AUTHOR,
+            //MediaStore.Audio.Media.AUTHOR,
             MediaStore.Audio.Media.COMPOSER,
             MediaStore.Audio.Media.TRACK,
             MediaStore.Audio.Media.YEAR,
             // REMOVED: GENRE
             MediaStore.Audio.Media.DATE_ADDED,
             MediaStore.Audio.Media.DATE_MODIFIED,
-            MediaStore.Audio.Media.IS_DOWNLOAD,
-            MediaStore.Audio.Media.IS_DRM,
-            MediaStore.Audio.Media.IS_FAVORITE,
-            MediaStore.Audio.Media.IS_PENDING,
-            MediaStore.Audio.Media.IS_TRASHED,
             MediaStore.MediaColumns.MIME_TYPE
         )
 
@@ -375,31 +358,23 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
 
                 val album = cursor.getNullableString(MediaStore.Audio.Media.ALBUM)
                 val albumArtist = cursor.getNullableString(MediaStore.Audio.Media.ALBUM_ARTIST)
-                val author = cursor.getNullableString(MediaStore.Audio.Media.AUTHOR)
                 val composer = cursor.getNullableString(MediaStore.Audio.Media.COMPOSER)
                 val track = cursor.getNullableInt(MediaStore.Audio.Media.TRACK)
                 val year = cursor.getNullableInt(MediaStore.Audio.Media.YEAR)
-                // Removed Genre
+                // Removed Genre, author
 
                 val size = cursor.getNullableLong(MediaStore.Audio.Media.SIZE)
                 val dateAdded = cursor.getNullableLong(MediaStore.Audio.Media.DATE_ADDED)
                 val dateModified = cursor.getNullableLong(MediaStore.Audio.Media.DATE_MODIFIED)
                 val bookmark = cursor.getNullableLong(MediaStore.Audio.Media.BOOKMARK)
-                val bitrate = cursor.getNullableInt(MediaStore.Audio.Media.BITRATE)
-                // Removed SampleRate, BitsPerSample
+                // Removed SampleRate, BitsPerSample, bitrate
 
-                // Removed isAudiobook, isRecording
+                // Removed isAudiobook, isRecording ...
                 val isMusic = cursor.getNullableBoolean(MediaStore.Audio.Media.IS_MUSIC) ?: false
                 val isPodcast = cursor.getNullableBoolean(MediaStore.Audio.Media.IS_PODCAST) ?: false
                 val isAlarm = cursor.getNullableBoolean(MediaStore.Audio.Media.IS_ALARM) ?: false
                 val isNotification = cursor.getNullableBoolean(MediaStore.Audio.Media.IS_NOTIFICATION) ?: false
                 val isRingtone = cursor.getNullableBoolean(MediaStore.Audio.Media.IS_RINGTONE) ?: false
-
-                val isDownload = cursor.getNullableBoolean(MediaStore.Audio.Media.IS_DOWNLOAD) ?: false
-                val isDrm = cursor.getNullableBoolean(MediaStore.Audio.Media.IS_DRM) ?: false
-                val isFavorite = cursor.getNullableBoolean(MediaStore.Audio.Media.IS_FAVORITE) ?: false
-                val isPending = cursor.getNullableBoolean(MediaStore.Audio.Media.IS_PENDING) ?: false
-                val isTrashed = cursor.getNullableBoolean(MediaStore.Audio.Media.IS_TRASHED) ?: false
 
                 if (duration > 30000
                     && album != null
@@ -411,14 +386,13 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                     files.add(
                         AudioFile(
                             id, contentUri, title, artist, duration, albumId,
-                            album, albumArtist, author, composer, track, year,
+                            album, albumArtist, composer, track, year,
                             // Removed Genre
                             size, dateAdded, dateModified,
-                            bookmark, bitrate,
+                            bookmark, // bitrate,
                             // Removed SampleRate, BitsPerSample
                             isMusic, isPodcast, isAlarm, isNotification, isRingtone,
-                            // Removed isAudiobook, isRecording
-                            isDownload, isDrm, isFavorite, isPending, isTrashed
+                            // Removed isAudiobook, isRecording ...
                         )
                     )
                 }

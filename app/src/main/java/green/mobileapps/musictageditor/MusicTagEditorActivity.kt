@@ -1,6 +1,7 @@
 package green.mobileapps.musictageditor
 
 import android.content.ContentValues
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -31,14 +32,24 @@ class MusicTagEditorActivity : AppCompatActivity() {
         binding = TagEditorActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        audioFile = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra("audio_file", AudioFile::class.java)
+        // Check if opened from another app via "Open With"
+        if (intent.data != null && (intent.action == Intent.ACTION_VIEW || intent.action == Intent.ACTION_EDIT)) {
+            val uri = intent.data!!
+            // Launch a coroutine to load metadata, as IO operations shouldn't be on Main Thread
+            lifecycleScope.launch {
+                audioFile = createAudioFileFromUri(uri)
+                setupUI()
+            }
         } else {
-            @Suppress("DEPRECATION")
-            intent.getParcelableExtra("audio_file")
+            // Standard internal launch
+            audioFile = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra("audio_file", AudioFile::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra("audio_file")
+            }
+            setupUI()
         }
-
-        setupUI()
 
         binding.buttonSave.setOnClickListener {
             requestWritePermission()
@@ -220,7 +231,14 @@ class MusicTagEditorActivity : AppCompatActivity() {
             put(MediaStore.Audio.Media.DATE_MODIFIED, newTimestamp)
         }
 
-        contentResolver.update(file.uri, values, null, null)
+        try {
+            // Only attempt to update MediaStore if we have a valid ID or if it's a content URI we can write to
+            if (file.id != -1L) {
+                contentResolver.update(file.uri, values, null, null)
+            }
+        } catch (e: Exception) {
+            Log.w("MusicTagEditor", "Could not update MediaStore index (File might be external): ${e.message}")
+        }
 
         withContext(Dispatchers.Main) {
             val updated = file.copy(
@@ -239,5 +257,87 @@ class MusicTagEditorActivity : AppCompatActivity() {
             Toast.makeText(this@MusicTagEditorActivity, "Saved Successfully!", Toast.LENGTH_SHORT).show()
             finish()
         }
+    }
+
+    private suspend fun createAudioFileFromUri(uri: Uri): AudioFile = withContext(Dispatchers.IO) {
+        val retriever = android.media.MediaMetadataRetriever()
+        var title = "Unknown Title"
+        var artist = "Unknown Artist"
+        var album = ""
+        var albumArtist = ""
+        var composer = ""
+        var year: Int? = null
+        var track: Int? = null
+        var duration = 0L
+
+        try {
+            retriever.setDataSource(this@MusicTagEditorActivity, uri)
+            title = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_TITLE) ?: getFileName(uri) ?: "Unknown"
+            artist = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "Unknown Artist"
+            album = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_ALBUM) ?: ""
+            albumArtist = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST) ?: ""
+            composer = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_COMPOSER) ?: ""
+
+            val yearStr = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_YEAR)
+            year = yearStr?.toIntOrNull()
+
+            val trackStr = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER)
+            // Handle formats like "1/12"
+            track = trackStr?.split("/")?.firstOrNull()?.trim()?.toIntOrNull()
+
+            val durationStr = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)
+            duration = durationStr?.toLongOrNull() ?: 0L
+        } catch (e: Exception) {
+            Log.e("TagEditor", "Error parsing metadata from URI", e)
+        } finally {
+            retriever.release()
+        }
+
+        // Construct a "dummy" AudioFile.
+        // We set ID to -1 and AlbumID to null because this file might not be in the MediaStore.
+        AudioFile(
+            id = -1L,
+            uri = uri,
+            title = title,
+            artist = artist,
+            duration = duration,
+            albumId = null, // Will force fallback to embedded picture in setupUI
+            album = album,
+            albumArtist = albumArtist,
+            composer = composer,
+            track = track,
+            year = year,
+            size = null,
+            dateAdded = System.currentTimeMillis() / 1000,
+            dateModified = System.currentTimeMillis() / 1000,
+            bookmark = null,
+            isMusic = true,
+            isPodcast = false,
+            isAlarm = false,
+            isNotification = false,
+            isRingtone = false
+        )
+    }
+
+    // Helper to get filename if metadata title is missing
+    private fun getFileName(uri: Uri): String? {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            val cursor = contentResolver.query(uri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val index = it.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                    if (index != -1) result = it.getString(index)
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result?.lastIndexOf('/')
+            if (cut != null && cut != -1) {
+                result = result?.substring(cut + 1)
+            }
+        }
+        return result
     }
 }
