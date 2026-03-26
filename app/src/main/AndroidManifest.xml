@@ -16,7 +16,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_evertag_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MusicTagEditor" >
+        android:theme="@style/Theme.Material3.Dark.NoActionBar">
 
         <activity
             android:name=".MainActivity"
