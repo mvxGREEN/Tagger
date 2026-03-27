@@ -133,9 +133,7 @@ data class AudioFile(
     val composer: String?,
     val track: Int?,
     val year: Int?,
-    // REMOVED: val genre: String?,
-
-    // File Metadata
+    val genre: String?,
     val size: Long?,
     val dateAdded: Long?,
     val dateModified: Long?,
@@ -176,7 +174,7 @@ data class AudioFile(
         parcel.readString(),
         parcel.readValue(Int::class.java.classLoader) as? Int,
         parcel.readValue(Int::class.java.classLoader) as? Int,
-        // Removed Genre
+        parcel.readString(),
         parcel.readValue(Long::class.java.classLoader) as? Long,
         parcel.readValue(Long::class.java.classLoader) as? Long,
         parcel.readValue(Long::class.java.classLoader) as? Long,
@@ -203,7 +201,8 @@ data class AudioFile(
         parcel.writeString(composer)
         parcel.writeValue(track)
         parcel.writeValue(year)
-        // Removed Genre, Author
+        parcel.writeString(genre)
+        // Removed Author
         parcel.writeValue(size)
         parcel.writeValue(dateAdded)
         parcel.writeValue(dateModified)
@@ -318,7 +317,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         val contentResolver = context.contentResolver
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
-        val projection = arrayOf(
+        val projectionList = mutableListOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
@@ -346,6 +345,13 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             MediaStore.MediaColumns.MIME_TYPE
         )
 
+        // Only add GENRE column for Android 11 (API 30) and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            projectionList.add(MediaStore.Audio.Media.GENRE)
+        }
+
+        val projection = projectionList.toTypedArray()
+
         val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
 
         contentResolver.query(uri, projection, selection, null, null)?.use { cursor ->
@@ -362,7 +368,15 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                 val composer = cursor.getNullableString(MediaStore.Audio.Media.COMPOSER)
                 val track = cursor.getNullableInt(MediaStore.Audio.Media.TRACK)
                 val year = cursor.getNullableInt(MediaStore.Audio.Media.YEAR)
-                // Removed Genre, author
+
+                // Safely extract genre based on OS version
+                val genre = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    cursor.getNullableString(MediaStore.Audio.Media.GENRE)
+                } else {
+                    null
+                }
+
+                // removed author
 
                 val size = cursor.getNullableLong(MediaStore.Audio.Media.SIZE)
                 val dateAdded = cursor.getNullableLong(MediaStore.Audio.Media.DATE_ADDED)
@@ -388,7 +402,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                         AudioFile(
                             id, contentUri, title, artist, duration, albumId,
                             album, albumArtist, composer, track, year,
-                            // Removed Genre
+                            genre,
                             size, dateAdded, dateModified,
                             bookmark, // bitrate,
                             // Removed SampleRate, BitsPerSample

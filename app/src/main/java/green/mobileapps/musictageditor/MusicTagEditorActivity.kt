@@ -80,7 +80,7 @@ class MusicTagEditorActivity : AppCompatActivity() {
             binding.etTitle.setText(file.title)
             binding.etArtist.setText(file.artist)
             binding.etAlbum.setText(file.album)
-            // REMOVED: binding.etGenre.setText(file.genre)
+            binding.etGenre.setText(file.genre)
             binding.etAlbumArtist.setText(file.albumArtist)
             binding.etComposer.setText(file.composer)
             binding.etYear.setText(file.year?.toString() ?: "")
@@ -221,6 +221,7 @@ class MusicTagEditorActivity : AppCompatActivity() {
                         setTagField(org.jaudiotagger.tag.FieldKey.ALBUM, binding.etAlbum.text.toString())
                         setTagField(org.jaudiotagger.tag.FieldKey.ALBUM_ARTIST, binding.etAlbumArtist.text.toString())
                         setTagField(org.jaudiotagger.tag.FieldKey.TRACK, binding.etTrackNumber.text.toString())
+                        setTagField(org.jaudiotagger.tag.FieldKey.GENRE, binding.etGenre.text.toString())
                         setTagField(org.jaudiotagger.tag.FieldKey.COMPOSER, binding.etComposer.text.toString())
                         setTagField(org.jaudiotagger.tag.FieldKey.YEAR, binding.etYear.text.toString())
 
@@ -322,7 +323,10 @@ class MusicTagEditorActivity : AppCompatActivity() {
             put(MediaStore.Audio.Media.COMPOSER, binding.etComposer.text.toString())
             put(MediaStore.Audio.Media.YEAR, binding.etYear.text.toString().toIntOrNull())
             put(MediaStore.Audio.Media.TRACK, binding.etTrackNumber.text.toString().toIntOrNull())
-            // REMOVED: Genre update
+            // Conditionally update MediaStore Genre
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                put(MediaStore.Audio.Media.GENRE, binding.etGenre.text.toString())
+            }
             put(MediaStore.Audio.Media.DATE_MODIFIED, newTimestamp)
         }
 
@@ -344,10 +348,8 @@ class MusicTagEditorActivity : AppCompatActivity() {
                 composer = binding.etComposer.text.toString(),
                 year = binding.etYear.text.toString().toIntOrNull(),
                 track = binding.etTrackNumber.text.toString().toIntOrNull(),
-
+                genre = binding.etGenre.text.toString(),
                 albumId = null,
-
-                // Removed Genre from copy
                 dateModified = newTimestamp
             )
 
@@ -366,6 +368,7 @@ class MusicTagEditorActivity : AppCompatActivity() {
         var composer = ""
         var year: Int? = null
         var track: Int? = null
+        var genre: String? = null
         var duration = 0L
 
         try {
@@ -378,6 +381,8 @@ class MusicTagEditorActivity : AppCompatActivity() {
 
             val yearStr = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_YEAR)
             year = yearStr?.toIntOrNull()
+
+            genre = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_GENRE)
 
             val trackStr = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER)
             // Handle formats like "1/12"
@@ -405,6 +410,7 @@ class MusicTagEditorActivity : AppCompatActivity() {
             composer = composer,
             track = track,
             year = year,
+            genre = genre,
             size = null,
             dateAdded = System.currentTimeMillis() / 1000,
             dateModified = System.currentTimeMillis() / 1000,
