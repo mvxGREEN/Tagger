@@ -47,7 +47,7 @@
                     app:layout_constraintBottom_toBottomOf="@id/edit_album_art"
                     android:src="@drawable/photo_library_24px"
                     app:tint="@color/gmaGreenWhite"
-                    android:backgroundTint="@color/gmaGreenDarkMono"
+                    android:backgroundTint="@color/gmaEucalyptus"
                     android:contentDescription="@string/cd_photo_library_button"
                     android:layout_margin="8dp" />
 
@@ -108,7 +108,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="8dp"
                 android:hint="Title"
                 android:theme="@style/ThemeOverlay.MaterialComponents.Dark"
                 app:boxBackgroundColor="@android:color/transparent">
@@ -232,7 +232,7 @@
         android:src="@drawable/save_24px"
         app:tint="@color/gmaGreenWhite"
         app:shapeAppearanceOverlay="@style/SquareFAB"
-        android:backgroundTint="@color/gmaGreenDarkMono"
+        android:backgroundTint="@color/gmaEucalyptus"
         android:contentDescription="@string/cd_photo_library_button"
         android:layout_margin="16dp" />
 
