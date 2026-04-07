@@ -361,7 +361,10 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                 val album = cursor.getNullableString(MediaStore.Audio.Media.ALBUM)
                 val albumArtist = cursor.getNullableString(MediaStore.Audio.Media.ALBUM_ARTIST)
                 val composer = cursor.getNullableString(MediaStore.Audio.Media.COMPOSER)
-                val track = cursor.getNullableInt(MediaStore.Audio.Media.TRACK)
+
+                val rawTrack = cursor.getNullableInt(MediaStore.Audio.Media.TRACK)
+                val track = if (rawTrack != null && rawTrack >= 1000) rawTrack % 1000 else rawTrack
+
                 val year = cursor.getNullableInt(MediaStore.Audio.Media.YEAR)
 
                 // Safely extract genre based on OS version
