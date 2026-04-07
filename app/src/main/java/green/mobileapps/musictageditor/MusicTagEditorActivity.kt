@@ -8,8 +8,11 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,8 +20,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.google.firebase.analytics.FirebaseAnalytics
 import green.mobileapps.musictageditor.databinding.TagEditorActivityBinding
 import kotlinx.coroutines.*
+import java.net.InetAddress
 
 class MusicTagEditorActivity : AppCompatActivity() {
 
@@ -127,6 +132,132 @@ class MusicTagEditorActivity : AppCompatActivity() {
             binding.editAlbumArtFab.setOnClickListener {
                 pickImageLauncher.launch("image/*")
             }
+        }
+
+        binding.etMainInput.addTextChangedListener(object : TextWatcher {
+            var oldCount = 0
+
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+                oldCount = count
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                if (count == 0 && oldCount != 0) {
+                    killKeyboard()
+                } else if (count - oldCount > 1) {
+
+                    if (!binding.etMainInput.hasFocus()) return
+
+                    var input = s.toString()
+
+                    if (input.lastIndexOf("https://") != input.indexOf("https://")) {
+                        input = input.substring(input.lastIndexOf("https://"))
+                    }
+                    val inputText = input
+
+                    var domain = input.substring(input.indexOf("https://") + 8)
+                    if (domain.contains("/")) {
+                        domain = domain.substring(0, domain.indexOf("/"))
+                    }
+                    try {
+                        val bundle = Bundle().apply {
+                            putString("app_name", "tagger")
+                            putString("input", input)
+                            putString("domain", domain)
+                        }
+                        FirebaseAnalytics.getInstance(this@MusicTagEditorActivity).logEvent("valid_input", bundle)
+                    } catch (ignored: Exception) {}
+
+                    killKeyboard()
+
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        if (isInternetAvailable()) {
+                            try {
+                                // 1. Setup connection and pretend to be a browser to prevent 403 errors
+                                val url = java.net.URL(inputText)
+                                val connection = url.openConnection() as java.net.HttpURLConnection
+                                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                                connection.instanceFollowRedirects = true
+                                connection.connect()
+
+                                // 2. Verify the URL actually points to an image
+                                val contentType = connection.contentType ?: ""
+                                if (connection.responseCode != java.net.HttpURLConnection.HTTP_OK || !contentType.startsWith("image/")) {
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(this@MusicTagEditorActivity, "Invalid link: Please paste a direct image URL.", Toast.LENGTH_LONG).show()
+                                    }
+                                    return@launch
+                                }
+
+                                // 3. Save it to a temporary cache file
+                                val tempFile = java.io.File(cacheDir, "downloaded_art_${System.currentTimeMillis()}.jpg")
+                                connection.inputStream.use { input ->
+                                    tempFile.outputStream().use { output ->
+                                        input.copyTo(output)
+                                    }
+                                }
+
+                                // 4. Double-check the file is a valid, uncorrupted bitmap
+                                val options = android.graphics.BitmapFactory.Options()
+                                options.inJustDecodeBounds = true
+                                android.graphics.BitmapFactory.decodeFile(tempFile.absolutePath, options)
+                                if (options.outWidth == -1 || options.outHeight == -1) {
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(this@MusicTagEditorActivity, "Downloaded file is corrupted or not an image.", Toast.LENGTH_LONG).show()
+                                    }
+                                    return@launch
+                                }
+
+                                val downloadedUri = Uri.fromFile(tempFile)
+
+                                // 5. Switch back to the Main Thread to update the UI
+                                withContext(Dispatchers.Main) {
+                                    selectedImageUri = downloadedUri
+
+                                    Glide.with(this@MusicTagEditorActivity)
+                                        .load(downloadedUri)
+                                        .transform(com.bumptech.glide.load.resource.bitmap.CircleCrop())
+                                        .into(binding.editAlbumArt)
+
+                                    Toast.makeText(this@MusicTagEditorActivity, "Artwork downloaded!", Toast.LENGTH_SHORT).show()
+                                }
+
+                            } catch (e: Exception) {
+                                Log.e("MusicTagEditor", "Error downloading image from URL", e)
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(this@MusicTagEditorActivity, "Failed to download image", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(this@MusicTagEditorActivity, getString(R.string.msg_no_internet), Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun afterTextChanged(s: Editable) {
+                binding.btnClear.visibility = if (s.isNullOrEmpty()) View.INVISIBLE else View.VISIBLE
+            }
+        })
+
+        binding.btnClear.setOnClickListener {
+            binding.etMainInput.setText("")
+        }
+    }
+
+    fun killKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(findViewById<View>(R.id.etMainInput).windowToken, 0)
+    }
+
+    fun isInternetAvailable(): Boolean {
+        return try {
+            val ipAddr = InetAddress.getByName("google.com")
+            ipAddr.toString().isNotEmpty()
+        } catch (e: Exception) {
+            false
         }
     }
 

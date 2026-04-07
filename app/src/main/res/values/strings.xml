@@ -32,4 +32,5 @@
     <string name="cd_photo_library_button">photo library button\n</string>
     <string name="paste_art_url">Paste Art URL…</string>
     <string name="clear_button">Clear Button</string>
+    <string name="msg_no_internet">Not connected to internet</string>
 </resources>
