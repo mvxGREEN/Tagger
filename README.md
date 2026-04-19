@@ -20,7 +20,7 @@
 
 ## 🛠️ Tech Stack
 
-* **Language**: [Kotlin](https://kotlinlang.org/) (100%)
+* **Language**: [Kotlin](https://kotlinlang.org/)
 * **Framework**: Android SDK
 * **Build System**: Gradle (Kotlin DSL)
 
