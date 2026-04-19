@@ -1,15 +1,15 @@
 # AudioTagger 🎵🏷️
 
-[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/mvxGREEN/Tagger/actions)
+[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/mvxGREEN/AudioTagger/actions)
 [![License: WTFPL](https://img.shields.io/badge/License-WTFPL-brightgreen.svg)](http://www.wtfpl.net/about/)
 [![Language: Kotlin](https://img.shields.io/badge/Language-Kotlin-purple.svg)](https://kotlinlang.org/)
 [![Platform: Android](https://img.shields.io/badge/Platform-Android-3DDC84.svg)](https://developer.android.com/)
 
-ID3 audio tag editor app built natively for Android.  
+**AudioTagger** is an ID3 audio tag editor app built natively for Android.  
 
-**AudioTagger** allows users to quickly modify and manage metadata (ID3 tags) and album art of music on their mobile devices.  
+Quickly modify and manage metadata (ID3 tags) and album art of all audio files on your mobile devices.  
 
-Supports all audio file types!
+Supports ALL audio file types! Converts file types that do not support tagging to MP3.
 
 ## ✨ Features
 
