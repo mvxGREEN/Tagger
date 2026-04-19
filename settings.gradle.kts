@@ -20,6 +20,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Tagger"
+rootProject.name = "AudioTagger"
 include(":app")
  
