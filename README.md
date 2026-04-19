@@ -5,7 +5,7 @@
 [![Language: Kotlin](https://img.shields.io/badge/Language-Kotlin-purple.svg)](https://kotlinlang.org/)
 [![Platform: Android](https://img.shields.io/badge/Platform-Android-3DDC84.svg)](https://developer.android.com/)
 
-**Tagger** is a lightweight and powerful audio tag editor application built natively for Android. It allows users to easily modify and manage metadata (ID3 tags) for various audio file formats directly from their mobile devices. 
+**Tagger** is an ID3 audio tag editor application built natively for Android.  It allows users to modify and manage metadata (ID3 tags) of any audio file on their mobile devices. 
 
 ## ✨ Features
 
