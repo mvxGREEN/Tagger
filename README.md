@@ -5,7 +5,7 @@
 [![Language: Kotlin](https://img.shields.io/badge/Language-Kotlin-purple.svg)](https://kotlinlang.org/)
 [![Platform: Android](https://img.shields.io/badge/Platform-Android-3DDC84.svg)](https://developer.android.com/)
 
-**AudioTagger** is an ID3 audio tag editor application built natively for Android.  It allows users to modify and manage metadata (ID3 tags) of any audio file on their mobile devices. 
+**AudioTagger** is an ID3 audio tag editor application built natively for Android.  It allows users to modify and manage metadata (ID3 tags) and album art of any audio file on their mobile devices. 
 
 ## ✨ Features
 
