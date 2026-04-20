@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/launcher_tagger_round.png" alt="Tagger Round App Icon" width="180"/>
+</p>
+
 # AudioTagger 🎵🏷️
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/mvxGREEN/AudioTagger/actions)
@@ -20,7 +24,7 @@ Supports ALL audio file types! Converts file types that do not support tagging t
   * M4A
   * AAC
 * **Intuitive Editor**: Easily modify track details such as Title, Artist, Album, Year, Genre, and more.
-* **Modern UI**: Built specifically for Android, ensuring a smooth and responsive user experience.
+* **Modern UI**: Built natively for Android, ensuring a smooth and responsive user experience.
 * **Native Performance**: 100% written in Kotlin for optimal performance and safety.
 
 ## 🛠️ Tech Stack
@@ -28,6 +32,18 @@ Supports ALL audio file types! Converts file types that do not support tagging t
 * **Language**: [Kotlin](https://kotlinlang.org/)
 * **Framework**: Android SDK
 * **Build System**: Gradle (Kotlin DSL)
+
+* ## 📸 Screenshots
+
+<p align="center">
+  <img src="assets/Screenshot 1.png" width="180"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/Screenshot 2.png" width="180"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/Screenshot 3.png" width="180"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/Screenshot 4.png" width="180"/>
+</p>
 
 ## ⚡️ Quick Start:
 
