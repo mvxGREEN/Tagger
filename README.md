@@ -13,6 +13,8 @@
 
 Quickly modify and manage metadata (ID3 tags) and album art of all audio files on your mobile devices.
 
+## 📸 Screenshots
+
 <p align="center">
   <img src="assets/Screenshot 1.png" width="180"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
